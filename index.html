@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Irish Economy & Fiscal Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.34.0.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b132b;
+      --panel: #0f1a33;
+      --accent: #22d3ee;
+      --text: #eaf0f7;
+      --muted: #9fb0c7;
+      --good: #22c55e;
+      --bad: #ef4444;
+    }
+    body { background: var(--bg); color: var(--text); }
+    .navbar { background: #0a0f25; }
+    .navbar-brand { color: var(--text) !important; font-weight: 700; letter-spacing: .2px; }
+    .kpi-card {
+      background: linear-gradient(135deg, #111a34, #0f1930);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 14px;
+      padding: 16px 18px;
+      height: 100%;
+      box-shadow: 0 6px 18px rgba(0,0,0,.28);
+    }
+    .kpi-title { font-size: .85rem; text-transform: uppercase; color: var(--muted); letter-spacing: .08rem; }
+    .kpi-value { font-size: 1.9rem; font-weight: 800; }
+    .kpi-sub { font-size: .9rem; color: var(--muted); }
+    .chip { display:inline-block; padding:2px 8px; border-radius:999px; font-size:.8rem; margin-left:6px; }
+    .chip.good { background: rgba(34,197,94,.15); color: var(--good); border: 1px solid rgba(34,197,94,.35); }
+    .chip.bad { background: rgba(239,68,68,.15); color: var(--bad); border: 1px solid rgba(239,68,68,.35); }
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 16px;
+      padding: 18px 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    .panel h5 { font-size: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08rem; margin-bottom: 8px; }
+    .source-link { font-size: .85rem; color: var(--muted); }
+    .footer-note { color: var(--muted); font-size: .9rem; }
+    .warning { color: #f59e0b; }
+    .spinner {
+      width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.2); border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 1s linear infinite; display: inline-block; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg);}}
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: .8rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Irish Economy & Fiscal Dashboard</a>
+      <span class="ms-auto small text-secondary">Served from GitHub Pages · Last snapshot: <span id="lastSnap">—</span></span>
+    </div>
+  </nav>
+  <main class="container my-4">
+    <div class="row g-3 mb-2 align-items-center">
+      <div class="col">
+        <h2 class="mb-1">Key signals</h2>
+        <div class="footer-note">The charts below use <span class="kbd">data/snapshot.json</span> generated daily at 08:00 Dublin time.</div>
+      </div>
+      <div class="col-auto">
+        <a class="btn btn-outline-light btn-sm" href="data/snapshot.json" target="_blank" rel="noopener">View raw JSON</a>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+          <div class="kpi-title">Unemployment rate (SA)</div>
+          <div class="kpi-value" id="kpi-unemp">—</div>
+          <div class="kpi-sub" id="kpi-unemp-sub">Loading…</div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+          <div class="kpi-title">Tax receipts (YTD)</div>
+          <div class="kpi-value" id="kpi-tax">—</div>
+          <div class="kpi-sub" id="kpi-tax-sub">Latest month</div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+          <div class="kpi-title">GNI* (constant)</div>
+          <div class="kpi-value" id="kpi-gnistar">—</div>
+          <div class="kpi-sub" id="kpi-gnistar-sub">Annual</div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+          <div class="kpi-title">Wage growth (y/y)</div>
+          <div class="kpi-value" id="kpi-wages">—</div>
+          <div class="kpi-sub" id="kpi-wages-sub">EHECS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-3">
+      <div class="col-12 col-xl-6">
+        <div class="panel">
+          <h5>Modified Domestic Demand (chain-linked)</h5>
+          <div id="chart-mdd" style="height:340px"></div>
+          <div class="source-link">CSO PxStat NQQ46</div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-6">
+        <div class="panel">
+          <h5>Current Account balance (quarterly, €bn)</h5>
+          <div id="chart-ca" style="height:340px"></div>
+          <div class="source-link">CSO PxStat BPQ15</div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-6">
+        <div class="panel">
+          <h5>Employment rate (15–64)</h5>
+          <div id="chart-emp-rate" style="height:340px"></div>
+          <div class="source-link">CSO PxStat ALF01</div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-6">
+        <div class="panel">
+          <h5>Live Register (SA, '000)</h5>
+          <div id="chart-lr" style="height:340px"></div>
+          <div class="source-link">CSO PxStat LRM02</div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-6">
+        <div class="panel">
+          <h5>Residential supply: completions & permissions</h5>
+          <div id="chart-housing" style="height:340px"></div>
+          <div class="source-link">CSO PxStat NDQ01 & BHQ05</div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-6">
+        <div class="panel">
+          <h5>Inflation: Ireland vs euro area (HICP y/y)</h5>
+          <div id="chart-hicp" style="height:340px"></div>
+          <div class="source-link">ECB SDW & CSO</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 footer-note">Data © CSO, Department of Finance, ECB. Built with Plotly + Bootstrap.</div>
+  </main>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "generated_at": "1970-01-01T00:00:00Z",
+  "series": {
+    "unemployment_rate": {
+      "x": [],
+      "y": [],
+      "latest": null,
+      "latest_date": null
+    },
+    "tax_receipts": {},
+    "gni_star": {},
+    "wage_growth": {},
+    "mdd": {
+      "x": [],
+      "y": []
+    },
+    "current_account": {
+      "x": [],
+      "y": []
+    },
+    "employment_rate": {
+      "x": [],
+      "y": []
+    },
+    "live_register": {
+      "x": [],
+      "y": []
+    },
+    "housing": {
+      "completions": {
+        "x": [],
+        "y": []
+      },
+      "permissions": {
+        "x": [],
+        "y": []
+      }
+    },
+    "hicp": {
+      "ireland": {
+        "x": [],
+        "y": []
+      },
+      "ea19": {
+        "x": [],
+        "y": []
+      }
+    }
+  }
+}
