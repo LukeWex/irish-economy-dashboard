@@ -12,7 +12,7 @@ def pxstat_jsonstat(table):
 
 def px_to_df(table):
   js = pxstat_jsonstat(table)
-  ds = pyjstat.Dataset.read(js)
+  ds = pyjstat.Dataset.read(json.dumps(js))  # ← Fix: convert dict to JSON string
   return ds.write('dataframe')
 
 def last_pair(df, time_col, value_col, dropna=True):
